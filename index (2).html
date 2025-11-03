@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Interactive World Explorer - Discover countries, leaders, and world wonders!">
+    <meta name="keywords" content="world, countries, capitals, leaders, wonders, explorer">
+    <meta name="og:title" content="Interactive World Explorer">
+    <meta name="og:description" content="Explore all 195+ countries with leaders and world wonders">
+    <title>🌍 Interactive World Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .bg-blob {
+            position: fixed;
+            opacity: 0.1;
+            filter: blur(40px);
+            z-index: -1;
+        }
+
+        .blob-1 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(45deg, #ff6b9d, #feca57);
+            border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+            top: -10%;
+            left: -5%;
+            animation: blob 8s infinite;
+        }
+
+        .blob-2 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border-radius: 70% 30% 30% 70% / 70% 70% 30% 30%;
+            top: 50%;
+            right: -10%;
+            animation: blob 10s infinite reverse;
+        }
+
+        .blob-3 {
+            width: 350px;
+            height: 350px;
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+            border-radius: 30% 70% 30% 70% / 70% 30% 70% 30%;
+            bottom: -10%;
+            left: 20%;
+            animation: blob 12s infinite;
+        }
+
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: slideDown 0.8s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 56px;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #ffd700, #ff69b4, #00d4ff);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: textShine 6s ease infinite;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        @keyframes textShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 300;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.8);
+            background: white;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transform: scale(1.02);
+        }
+
+        .region-filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .region-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .region-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .region-btn.active {
+            background: linear-gradient(45deg, #ff6b9d, #feca57);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4);
+            transform: scale(1.05);
+        }
+
+        .stats-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 15px 25px;
+            color: white;
+            font-weight: 600;
+            text-align: center;
+            font-size: 16px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .countries-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .country-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            animation: cardAppear 0.6s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            height: 360px;
+        }
+
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8) rotateY(20deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotateY(0);
+            }
+        }
+
+        .country-card:hover {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        .flag-section {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .country-card:nth-child(6n+1) .flag-section {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+        }
+
+        .country-card:nth-child(6n+2) .flag-section {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .country-card:nth-child(6n+3) .flag-section {
+            background: linear-gradient(135deg, #43e97b, #38f9d7);
+        }
+
+        .country-card:nth-child(6n+4) .flag-section {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+        }
+
+        .country-card:nth-child(6n+5) .flag-section {
+            background: linear-gradient(135deg, #30cfd0, #330867);
+        }
+
+        .country-card:nth-child(6n) .flag-section {
+            background: linear-gradient(135deg, #a8edea, #fed6e3);
+        }
+
+        .country-info {
+            padding: 25px;
+        }
+
+        .country-name {
+            font-size: 22px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 12px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .country-name:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 0 8px rgba(102, 126, 234, 0.4));
+        }
+
+        .info-row {
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .label {
+            font-size: 10px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+
+        .value {
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .region-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(240, 240, 255, 0.98));
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 30px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 40px 30px;
+            text-align: center;
+            border-radius: 30px 30px 0 0;
+            position: relative;
+        }
+
+        .modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: 30px 30px 0 0;
+        }
+
+        .modal-flag {
+            font-size: 100px;
+            margin-bottom: 15px;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .modal-country-name {
+            font-size: 42px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+        }
+
+        .modal-capital {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        .modal-body {
+            padding: 40px 30px;
+        }
+
+        .info-section {
+            margin-bottom: 30px;
+            animation: slideInLeft 0.5s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .info-section:nth-child(2) { animation-delay: 0.1s; }
+        .info-section:nth-child(3) { animation-delay: 0.2s; }
+        .info-section:nth-child(4) { animation-delay: 0.3s; }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #667eea;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-content {
+            background: rgba(102, 126, 234, 0.08);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .leader-info {
+            background: linear-gradient(135deg, rgba(240, 147, 251, 0.1), rgba(245, 87, 108, 0.1));
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #f093fb;
+        }
+
+        .wonder-item {
+            background: linear-gradient(135deg, rgba(67, 233, 123, 0.1), rgba(56, 249, 215, 0.1));
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid #43e97b;
+            transition: all 0.3s;
+        }
+
+        .wonder-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(67, 233, 123, 0.2);
+        }
+
+        .wonder-name {
+            font-weight: 700;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .wonder-description {
+            font-size: 13px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .no-wonder {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .close {
+            color: white;
+            position: absolute;
+            right: 30px;
+            top: 30px;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+        }
+
+        .close:hover {
+            background: rgba(0, 0, 0, 0.4);
+            transform: rotate(90deg);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 40px;
+            color: white;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 42px;
+            }
+
+            .countries-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 20% auto;
+            }
+
+            .modal-header {
+                padding: 30px 20px;
+            }
+
+            .modal-flag {
+                font-size: 70px;
+            }
+
+            .modal-country-name {
+                font-size: 32px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 32px;
+            }
+
+            .countries-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                border-radius: 20px;
+            }
+
+            .modal-header {
+                padding: 25px 15px;
+                border-radius: 20px 20px 0 0;
+            }
+
+            .modal-body {
+                padding: 25px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+    <div class="container">
+        <header>
+            <h1>🌍 INTERACTIVE WORLD EXPLORER</h1>
+            <p class="subtitle">Click on any country to discover leaders & world wonders</p>
+        </header>
+
+        <div class="controls">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="🔍 Search by country or capital..."
+            >
+
+            <div class="region-filters">
+                <button class="region-btn active" onclick="filterByRegion('all', event)">🌐 All</button>
+                <button class="region-btn" onclick="filterByRegion('Africa', event)">🦁 Africa</button>
+                <button class="region-btn" onclick="filterByRegion('Asia', event)">🏯 Asia</button>
+                <button class="region-btn" onclick="filterByRegion('Europe', event)">🏰 Europe</button>
+                <button class="region-btn" onclick="filterByRegion('Americas', event)">🗽 Americas</button>
+                <button class="region-btn" onclick="filterByRegion('Oceania', event)">🏝️ Oceania</button>
+            </div>
+
+            <div class="stats-bar">
+                <span id="countryCount">Loading amazing countries...</span>
+            </div>
+        </div>
+
+        <div class="countries-grid" id="countriesGrid">
+            <div class="no-results">⏳ Loading the world...</div>
+        </div>
+    </div>
+
+    <div id="countryModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div class="modal-flag" id="modalFlag"></div>
+                <div class="modal-country-name" id="modalCountryName"></div>
+                <div class="modal-capital" id="modalCapital"></div>
+            </div>
+            <div class="modal-body">
+                <div class="info-section">
+                    <div class="section-title">👑 Current Leader</div>
+                    <div class="leader-info">
+                        <div id="leaderInfo" style="color: #333; font-weight: 600; font-size: 16px; margin-bottom: 8px;"></div>
+                        <div id="positionInfo" style="color: #666; font-size: 13px;"></div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <div class="section-title">📍 Region</div>
+                    <div class="section-content" id="regionInfo" style="font-weight: 600; color: #333;"></div>
+                </div>
+
+                <div class="info-section">
+                    <div class="section-title">🏛️ World Wonders</div>
+                    <div id="wondersContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allCountries = [];
+        let currentRegion = 'all';
+
+        const countriesData = [
+            { name: 'Afghanistan', capital: 'Kabul', flag: '🇦🇫', region: 'Asia', leader: 'Mullah Mohammad Hassan Akhund', position: 'De facto Leader', wonders: [] },
+            { name: 'Albania', capital: 'Tirana', flag: '🇦🇱', region: 'Europe', leader: 'Edi Rama', position: 'Prime Minister', wonders: [] },
+            { name: 'Algeria', capital: 'Algiers', flag: '🇩🇿', region: 'Africa', leader: 'Abdelmadjid Tebboune', position: 'President', wonders: ['Timgad', 'Tassili n\'Ajjer'] },
+            { name: 'Andorra', capital: 'Andorra la Vella', flag: '🇦🇩', region: 'Europe', leader: 'Xavier Espot Zamora', position: 'Prime Minister', wonders: [] },
+            { name: 'Angola', capital: 'Luanda', flag: '🇦🇴', region: 'Africa', leader: 'João Lourenço', position: 'President', wonders: [] },
+            { name: 'Antigua and Barbuda', capital: 'Saint John\'s', flag: '🇦🇬', region: 'Americas', leader: 'Gaston Browne', position: 'Prime Minister', wonders: [] },
+            { name: 'Argentina', capital: 'Buenos Aires', flag: '🇦🇷', region: 'Americas', leader: 'Javier Milei', position: 'President', wonders: ['Iguazu Falls'] },
+            { name: 'Armenia', capital: 'Yerevan', flag: '🇦🇲', region: 'Asia', leader: 'Nikol Pashinyan', position: 'Prime Minister', wonders: [] },
+            { name: 'Australia', capital: 'Canberra', flag: '🇦🇺', region: 'Oceania', leader: 'Anthony Albanese', position: 'Prime Minister', wonders: ['Great Barrier Reef', 'Uluru'] },
+            { name: 'Austria', capital: 'Vienna', flag: '🇦🇹', region: 'Europe', leader: 'Karl Nehammer', position: 'Chancellor', wonders: [] },
+            { name: 'Azerbaijan', capital: 'Baku', flag: '🇦🇿', region: 'Asia', leader: 'Ilham Aliyev', position: 'President', wonders: [] },
+            { name: 'Bahamas', capital: 'Nassau', flag: '🇧🇸', region: 'Americas', leader: 'Philip Davis', position: 'Prime Minister', wonders: [] },
+            { name: 'Bahrain', capital: 'Manama', flag: '🇧🇭', region: 'Asia', leader: 'Hamad bin Isa Al Khalifa', position: 'King', wonders: [] },
+            { name: 'Bangladesh', capital: 'Dhaka', flag: '🇧🇩', region: 'Asia', leader: 'Sheikh Hasina', position: 'Prime Minister', wonders: ['Sundarbans'] },
+            { name: 'Barbados', capital: 'Bridgetown', flag: '🇧🇧', region: 'Americas', leader: 'Mia Mottley', position: 'Prime Minister', wonders: [] },
+            { name: 'Belarus', capital: 'Minsk', flag: '🇧🇾', region: 'Europe', leader: 'Alexander Lukashenko', position: 'President', wonders: [] },
+            { name: 'Belgium', capital: 'Brussels', flag: '🇧🇪', region: 'Europe', leader: 'Alexander De Croo', position: 'Prime Minister', wonders: [] },
+            { name: 'Belize', capital: 'Belmopan', flag: '🇧🇿', region: 'Americas', leader: 'John Briceño', position: 'Prime Minister', wonders: [] },
+            { name: 'Benin', capital: 'Porto-Novo', flag: '🇧🇯', region: 'Africa', leader: 'Patrice Talon', position: 'President', wonders: [] },
+            { name: 'Bhutan', capital: 'Thimphu', flag: '🇧🇹', region: 'Asia', leader: 'Lotay Sherpa', position: 'Prime Minister', wonders: [] },
+            { name: 'Bolivia', capital: 'La Paz', flag: '🇧🇴', region: 'Americas', leader: 'Luis Arce Catacora', position: 'President', wonders: [] },
+            { name: 'Bosnia and Herzegovina', capital: 'Sarajevo', flag: '🇧🇦', region: 'Europe', leader: 'Željka Cvijanović', position: 'President', wonders: [] },
+            { name: 'Botswana', capital: 'Gaborone', flag: '🇧🇼', region: 'Africa', leader: 'Mokgweetsi Masisi', position: 'President', wonders: [] },
+            { name: 'Brazil', capital: 'Brasília', flag: '🇧🇷', region: 'Americas', leader: 'Luiz Inácio Lula da Silva', position: 'President', wonders: ['Christ the Redeemer', 'Iguazu Falls'] },
+            { name: 'Brunei', capital: 'Bandar Seri Begawan', flag: '🇧🇳', region: 'Asia', leader: 'Hassanal Bolkiah', position: 'Sultan', wonders: [] },
+            { name: 'Bulgaria', capital: 'Sofia', flag: '🇧🇬', region: 'Europe', leader: 'Kiril Petkov', position: 'Prime Minister', wonders: [] },
+            { name: 'Burkina Faso', capital: 'Ouagadougou', flag: '🇧🇫', region: 'Africa', leader: 'Paul-Henri Sandaogo Damiba', position: 'President', wonders: [] },
+            { name: 'Burundi', capital: 'Gitega', flag: '🇧🇮', region: 'Africa', leader: 'Évariste Ndayishimiye', position: 'President', wonders: [] },
+            { name: 'Cambodia', capital: 'Phnom Penh', flag: '🇰🇭', region: 'Asia', leader: 'Hun Sen', position: 'Prime Minister', wonders: ['Angkor Wat'] },
+            { name: 'Cameroon', capital: 'Yaoundé', flag: '🇨🇲', region: 'Africa', leader: 'Paul Biya', position: 'President', wonders: [] },
+            { name: 'Canada', capital: 'Ottawa', flag: '🇨🇦', region: 'Americas', leader: 'Justin Trudeau', position: 'Prime Minister', wonders: ['Niagara Falls'] },
+            { name: 'Cape Verde', capital: 'Praia', flag: '🇨🇻', region: 'Africa', leader: 'José Maria Neves', position: 'Prime Minister', wonders: [] },
+            { name: 'Central African Republic', capital: 'Bangui', flag: '🇨🇫', region: 'Africa', leader: 'Faustin-Archange Touadéra', position: 'President', wonders: [] },
+            { name: 'Chad', capital: 'N\'Djamena', flag: '🇹🇩', region: 'Africa', leader: 'Mahamat Idriss Deby Itno', position: 'President', wonders: [] },
+            { name: 'Chile', capital: 'Santiago', flag: '🇨🇱', region: 'Americas', leader: 'Gabriel Boric', position: 'President', wonders: ['Easter Island', 'Atacama Desert'] },
+            { name: 'China', capital: 'Beijing', flag: '🇨🇳', region: 'Asia', leader: 'Xi Jinping', position: 'President', wonders: ['Great Wall of China', 'Forbidden City', 'Terracotta Army'] },
+            { name: 'Colombia', capital: 'Bogotá', flag: '🇨🇴', region: 'Americas', leader: 'Gustavo Petro', position: 'President', wonders: ['Machu Picchu'] },
+            { name: 'Comoros', capital: 'Moroni', flag: '🇰🇲', region: 'Africa', leader: 'Azali Assoumani', position: 'President', wonders: [] },
+            { name: 'Congo', capital: 'Brazzaville', flag: '🇨🇬', region: 'Africa', leader: 'Denis Sassou Nguesso', position: 'President', wonders: [] },
+            { name: 'Costa Rica', capital: 'San José', flag: '🇨🇷', region: 'Americas', leader: 'Rodrigo Chaves Robles', position: 'President', wonders: [] },
+            { name: 'Croatia', capital: 'Zagreb', flag: '🇭🇷', region: 'Europe', leader: 'Andrej Plenković', position: 'Prime Minister', wonders: [] },
+            { name: 'Cuba', capital: 'Havana', flag: '🇨🇺', region: 'Americas', leader: 'Miguel Díaz-Canel', position: 'President', wonders: [] },
+            { name: 'Cyprus', capital: 'Nicosia', flag: '🇨🇾', region: 'Europe', leader: 'Nikos Christodoulides', position: 'President', wonders: [] },
+            { name: 'Czech Republic', capital: 'Prague', flag: '🇨🇿', region: 'Europe', leader: 'Petr Fiala', position: 'Prime Minister', wonders: [] },
+            { name: 'Democratic Republic of Congo', capital: 'Kinshasa', flag: '🇨🇩', region: 'Africa', leader: 'Félix Tshisekedi', position: 'President', wonders: [] },
+            { name: 'Denmark', capital: 'Copenhagen', flag: '🇩🇰', region: 'Europe', leader: 'Mette Frederiksen', position: 'Prime Minister', wonders: [] },
+            { name: 'Djibouti', capital: 'Djibouti', flag: '🇩🇯', region: 'Africa', leader: 'Ismaïl Omar Guelleh', position: 'President', wonders: [] },
+            { name: 'Dominica', capital: 'Roseau', flag: '🇩🇲', region: 'Americas', leader: 'Roosevelt Skerrit', position: 'Prime Minister', wonders: [] },
+            { name: 'Dominican Republic', capital: 'Santo Domingo', flag: '🇩🇴', region: 'Americas', leader: 'Luis Abinader', position: 'President', wonders: [] },
+            { name: 'Ecuador', capital: 'Quito', flag: '🇪🇨', region: 'Americas', leader: 'Guillermo Lasso', position: 'President', wonders: ['Galápagos Islands'] },
+            { name: 'Egypt', capital: 'Cairo', flag: '🇪🇬', region: 'Africa', leader: 'Abdel Fattah el-Sisi', position: 'President', wonders: ['Great Pyramids of Giza', 'Sphinx'] },
+            { name: 'El Salvador', capital: 'San Salvador', flag: '🇸🇻', region: 'Americas', leader: 'Nayib Bukele', position: 'President', wonders: [] },
+            { name: 'Equatorial Guinea', capital: 'Malabo', flag: '🇬🇶', region: 'Africa', leader: 'Teodoro Nguema Obiang Mangue', position: 'Vice President', wonders: [] },
+            { name: 'Eritrea', capital: 'Asmara', flag: '🇪🇷', region: 'Africa', leader: 'Isaias Afwerki', position: 'President', wonders: [] },
+            { name: 'Estonia', capital: 'Tallinn', flag: '🇪🇪', region: 'Europe', leader: 'Kaja Kallas', position: 'Prime Minister', wonders: [] },
+            { name: 'Ethiopia', capital: 'Addis Ababa', flag: '🇪🇹', region: 'Africa', leader: 'Abiy Ahmed', position: 'Prime Minister', wonders: [] },
+            { name: 'Fiji', capital: 'Suva', flag: '🇫🇯', region: 'Oceania', leader: 'Sitiveni Rabuka', position: 'Prime Minister', wonders: [] },
+            { name: 'Finland', capital: 'Helsinki', flag: '🇫🇮', region: 'Europe', leader: 'Sanna Marin', position: 'Prime Minister', wonders: [] },
+            { name: 'France', capital: 'Paris', flag: '🇫🇷', region: 'Europe', leader: 'Emmanuel Macron', position: 'President', wonders: ['Eiffel Tower', 'Louvre Museum'] },
+            { name: 'Gabon', capital: 'Libreville', flag: '🇬🇦', region: 'Africa', leader: 'Ali Bongo Ondimba', position: 'President', wonders: [] },
+            { name: 'Gambia', capital: 'Banjul', flag: '🇬🇲', region: 'Africa', leader: 'Adama Barrow', position: 'President', wonders: [] },
+            { name: 'Georgia', capital: 'Tbilisi', flag: '🇬🇪', region: 'Asia', leader: 'Irakli Garibashvili', position: 'Prime Minister', wonders: [] },
+            { name: 'Germany', capital: 'Berlin', flag: '🇩🇪', region: 'Europe', leader: 'Olaf Scholz', position: 'Chancellor', wonders: ['Brandenburg Gate', 'Neuschwanstein Castle'] },
+            { name: 'Ghana', capital: 'Accra', flag: '🇬🇭', region: 'Africa', leader: 'John Dramani Mahama', position: 'President', wonders: [] },
+            { name: 'Greece', capital: 'Athens', flag: '🇬🇷', region: 'Europe', leader: 'Kyriakos Mitsotakis', position: 'Prime Minister', wonders: ['Parthenon', 'Acropolis'] },
+            { name: 'Grenada', capital: 'Saint George\'s', flag: '🇬🇩', region: 'Americas', leader: 'Dickon Mitchell', position: 'Prime Minister', wonders: [] },
+            { name: 'Guatemala', capital: 'Guatemala City', flag: '🇬🇹', region: 'Americas', leader: 'Arévalo Bernardo', position: 'President', wonders: [] },
+            { name: 'Guinea', capital: 'Conakry', flag: '🇬🇳', region: 'Africa', leader: 'Mamady Doumbouya', position: 'President', wonders: [] },
+            { name: 'Guinea-Bissau', capital: 'Bissau', flag: '🇬🇼', region: 'Africa', leader: 'Nuno Gomes Nabiam', position: 'Prime Minister', wonders: [] },
+            { name: 'Guyana', capital: 'Georgetown', flag: '🇬🇾', region: 'Americas', leader: 'Mohamed Irfaan Ali', position: 'President', wonders: [] },
+            { name: 'Haiti', capital: 'Port-au-Prince', flag: '🇭🇹', region: 'Americas', leader: 'Garry Conille', position: 'Prime Minister', wonders: [] },
+            { name: 'Honduras', capital: 'Tegucigalpa', flag: '🇭🇳', region: 'Americas', leader: 'Xiomara Castro', position: 'President', wonders: [] },
+            { name: 'Hungary', capital: 'Budapest', flag: '🇭🇺', region: 'Europe', leader: 'Viktor Orbán', position: 'Prime Minister', wonders: [] },
+            { name: 'Iceland', capital: 'Reykjavik', flag: '🇮🇸', region: 'Europe', leader: 'Bjarni Benediktsson', position: 'Prime Minister', wonders: [] },
+            { name: 'India', capital: 'New Delhi', flag: '🇮🇳', region: 'Asia', leader: 'Narendra Modi', position: 'Prime Minister', wonders: ['Taj Mahal', 'Statue of Unity'] },
+            { name: 'Indonesia', capital: 'Jakarta', flag: '🇮🇩', region: 'Asia', leader: 'Prabowo Subianto', position: 'President', wonders: ['Borobudur Temple'] },
+            { name: 'Iran', capital: 'Tehran', flag: '🇮🇷', region: 'Asia', leader: 'Masoud Pezeshkian', position: 'President', wonders: ['Persepolis'] },
+            { name: 'Iraq', capital: 'Baghdad', flag: '🇮🇶', region: 'Asia', leader: 'Mohammed Shia al-Sudani', position: 'Prime Minister', wonders: [] },
+            { name: 'Ireland', capital: 'Dublin', flag: '🇮🇪', region: 'Europe', leader: 'Leo Varadkar', position: 'Taoiseach', wonders: [] },
+            { name: 'Israel', capital: 'Jerusalem', flag: '🇮🇱', region: 'Asia', leader: 'Benjamin Netanyahu', position: 'Prime Minister', wonders: ['Dead Sea'] },
+            { name: 'Italy', capital: 'Rome', flag: '🇮🇹', region: 'Europe', leader: 'Giorgia Meloni', position: 'Prime Minister', wonders: ['Colosseum', 'Vatican', 'Leaning Tower of Pisa'] },
+            { name: 'Ivory Coast', capital: 'Yamoussoukro', flag: '🇨🇮', region: 'Africa', leader: 'Alassane Ouattara', position: 'President', wonders: [] },
+            { name: 'Jamaica', capital: 'Kingston', flag: '🇯🇲', region: 'Americas', leader: 'Andrew Holness', position: 'Prime Minister', wonders: [] },
+            { name: 'Japan', capital: 'Tokyo', flag: '🇯🇵', region: 'Asia', leader: 'Fumio Kishida', position: 'Prime Minister', wonders: ['Mount Fuji', 'Great Buddha of Nara'] },
+            { name: 'Jordan', capital: 'Amman', flag: '🇯🇴', region: 'Asia', leader: 'Bisher Al-Khasawneh', position: 'Prime Minister', wonders: ['Petra', 'Dead Sea'] },
+            { name: 'Kazakhstan', capital: 'Nur-Sultan', flag: '🇰🇿', region: 'Asia', leader: 'Olzhas Khомetovich Tokayev', position: 'President', wonders: [] },
+            { name: 'Kenya', capital: 'Nairobi', flag: '🇰🇪', region: 'Africa', leader: 'William Ruto', position: 'President', wonders: ['Mount Kilimanjaro', 'Serengeti'] },
+            { name: 'Kiribati', capital: 'Tarawa', flag: '🇰🇮', region: 'Oceania', leader: 'Taneti Maamau', position: 'President', wonders: [] },
+            { name: 'Korea, North', capital: 'Pyongyang', flag: '🇰🇵', region: 'Asia', leader: 'Kim Jong-un', position: 'Supreme Leader', wonders: [] },
+            { name: 'Korea, South', capital: 'Seoul', flag: '🇰🇷', region: 'Asia', leader: 'Yoon Suk-yeol', position: 'President', wonders: [] },
+            { name: 'Kuwait', capital: 'Kuwait City', flag: '🇰🇼', region: 'Asia', leader: 'Mohammed Al-Jaber Al-Mubarak Al-Sabah', position: 'Prime Minister', wonders: [] },
+            { name: 'Kyrgyzstan', capital: 'Bishkek', flag: '🇰🇬', region: 'Asia', leader: 'Sadyr Japarov', position: 'President', wonders: [] },
+            { name: 'Laos', capital: 'Vientiane', flag: '🇱🇦', region: 'Asia', leader: 'Sonexay Siphandone', position: 'Prime Minister', wonders: [] },
+            { name: 'Latvia', capital: 'Riga', flag: '🇱🇻', region: 'Europe', leader: 'Evika Siliņa', position: 'Prime Minister', wonders: [] },
+            { name: 'Lebanon', capital: 'Beirut', flag: '🇱🇧', region: 'Asia', leader: 'Najib Mikati', position: 'Prime Minister', wonders: [] },
+            { name: 'Lesotho', capital: 'Maseru', flag: '🇱🇸', region: 'Africa', leader: 'Sam Matekane', position: 'Prime Minister', wonders: [] },
+            { name: 'Liberia', capital: 'Monrovia', flag: '🇱🇷', region: 'Africa', leader: 'George Weah', position: 'President', wonders: [] },
+            { name: 'Libya', capital: 'Tripoli', flag: '🇱🇾', region: 'Africa', leader: 'Mohamed al-Menfi', position: 'President', wonders: ['Cyrene', 'Leptis Magna'] },
+            { name: 'Liechtenstein', capital: 'Vaduz', flag: '🇱🇮', region: 'Europe', leader: 'Klaus Tschütscher', position: 'Prime Minister', wonders: [] },
+            { name: 'Lithuania', capital: 'Vilnius', flag: '🇱🇹', region: 'Europe', leader: 'Ingrida Šimonytė', position: 'Prime Minister', wonders: [] },
+            { name: 'Luxembourg', capital: 'Luxembourg City', flag: '🇱🇺', region: 'Europe', leader: 'Luc Frieden', position: 'Prime Minister', wonders: [] },
+            { name: 'Madagascar', capital: 'Antananarivo', flag: '🇲🇬', region: 'Africa', leader: 'Andry Rajoelina', position: 'President', wonders: [] },
+            { name: 'Malawi', capital: 'Lilongwe', flag: '🇲🇼', region: 'Africa', leader: 'Lazarus McCarthy Chakwera', position: 'President', wonders: [] },
+            { name: 'Malaysia', capital: 'Kuala Lumpur', flag: '🇲🇾', region: 'Asia', leader: 'Anwar Ibrahim', position: 'Prime Minister', wonders: [] },
+            { name: 'Maldives', capital: 'Malé', flag: '🇲🇻', region: 'Asia', leader: 'Mohamed Muizzu', position: 'President', wonders: [] },
+            { name: 'Mali', capital: 'Bamako', flag: '🇲🇱', region: 'Africa', leader: 'Assimi Goïta', position: 'President', wonders: ['Timbuktu'] },
+            { name: 'Malta', capital: 'Valletta', flag: '🇲🇹', region: 'Europe', leader: 'Robert Abela', position: 'Prime Minister', wonders: [] },
+            { name: 'Marshall Islands', capital: 'Majuro', flag: '🇲🇭', region: 'Oceania', leader: 'Hilda Heine', position: 'President', wonders: [] },
+            { name: 'Mauritania', capital: 'Nouakchott', flag: '🇲🇷', region: 'Africa', leader: 'Mohamed Ould Ghazouani', position: 'President', wonders: [] },
+            { name: 'Mauritius', capital: 'Port Louis', flag: '🇲🇺', region: 'Africa', leader: 'Pravind Kumar Jugnauth', position: 'Prime Minister', wonders: [] },
+            { name: 'Mexico', capital: 'Mexico City', flag: '🇲🇽', region: 'Americas', leader: 'Andrés Manuel López Obrador', position: 'President', wonders: ['Chichen Itza', 'Teotihuacan'] },
+            { name: 'Micronesia', capital: 'Palikir', flag: '🇫🇲', region: 'Oceania', leader: 'David W. Panuelo', position: 'President', wonders: [] },
+            { name: 'Moldova', capital: 'Chișinău', flag: '🇲🇩', region: 'Europe', leader: 'Dorin Recean', position: 'Prime Minister', wonders: [] },
+            { name: 'Monaco', capital: 'Monaco', flag: '🇲🇨', region: 'Europe', leader: 'Prince Albert II', position: 'Sovereign Prince', wonders: [] },
+            { name: 'Mongolia', capital: 'Ulaanbaatar', flag: '🇲🇳', region: 'Asia', leader: 'Luvsannamsrai Oyun-Erdene', position: 'Prime Minister', wonders: [] },
+            { name: 'Montenegro', capital: 'Podgorica', flag: '🇲🇪', region: 'Europe', leader: 'Dritan Abazović', position: 'Prime Minister', wonders: [] },
+            { name: 'Morocco', capital: 'Rabat', flag: '🇲🇦', region: 'Africa', leader: 'Aziz Akhannouch', position: 'Prime Minister', wonders: ['Medina of Fez'] },
+            { name: 'Mozambique', capital: 'Maputo', flag: '🇲🇿', region: 'Africa', leader: 'Daniel Chapo', position: 'President', wonders: [] },
+            { name: 'Myanmar', capital: 'Naypyidaw', flag: '🇲🇲', region: 'Asia', leader: 'Min Aung Hlaing', position: 'Prime Minister', wonders: ['Shwedagon Pagoda'] },
+            { name: 'Namibia', capital: 'Windhoek', flag: '🇳🇦', region: 'Africa', leader: 'Hage Geingob', position: 'President', wonders: [] },
+            { name: 'Nauru', capital: 'Yaren', flag: '🇳🇷', region: 'Oceania', leader: 'David Adeang', position: 'President', wonders: [] },
+            { name: 'Nepal', capital: 'Kathmandu', flag: '🇳🇵', region: 'Asia', leader: 'Pushpa Kamal Dahal', position: 'Prime Minister', wonders: ['Mount Everest'] },
+            { name: 'Netherlands', capital: 'Amsterdam', flag: '🇳🇱', region: 'Europe', leader: 'Mark Rutte', position: 'Prime Minister', wonders: [] },
+            { name: 'New Zealand', capital: 'Wellington', flag: '🇳🇿', region: 'Oceania', leader: 'Christopher Luxon', position: 'Prime Minister', wonders: [] },
+            { name: 'Nicaragua', capital: 'Managua', flag: '🇳🇮', region: 'Americas', leader: 'Daniel Ortega', position: 'President', wonders: [] },
+            { name: 'Niger', capital: 'Niamey', flag: '🇳🇪', region: 'Africa', leader: 'Mohamed Bazoum', position: 'President', wonders: [] },
+            { name: 'Nigeria', capital: 'Abuja', flag: '🇳🇬', region: 'Africa', leader: 'Bola Tinubu', position: 'President', wonders: [] },
+            { name: 'North Macedonia', capital: 'Skopje', flag: '🇲🇰', region: 'Europe', leader: 'Dimitar Kovačevski', position: 'Prime Minister', wonders: [] },
+            { name: 'Norway', capital: 'Oslo', flag: '🇳🇴', region: 'Europe', leader: 'Jonas Gahr Støre', position: 'Prime Minister', wonders: ['Geirangerfjord'] },
+            { name: 'Oman', capital: 'Muscat', flag: '🇴🇲', region: 'Asia', leader: 'Haitham bin Tariq', position: 'Sultan', wonders: [] },
+            { name: 'Pakistan', capital: 'Islamabad', flag: '🇵🇰', region: 'Asia', leader: 'Muhammad Shehbaz Sharif', position: 'Prime Minister', wonders: ['Mohenjo-daro'] },
+            { name: 'Palau', capital: 'Ngerulmud', flag: '🇵🇼', region: 'Oceania', leader: 'Surangel Whipps Jr.', position: 'President', wonders: [] },
+            { name: 'Palestine', capital: 'Ramallah', flag: '🇵🇸', region: 'Asia', leader: 'Mohammed Shtayyeh', position: 'Prime Minister', wonders: [] },
+            { name: 'Panama', capital: 'Panama City', flag: '🇵🇦', region: 'Americas', leader: 'José Raúl Mulino', position: 'President', wonders: ['Panama Canal'] },
+            { name: 'Papua New Guinea', capital: 'Port Moresby', flag: '🇵🇬', region: 'Oceania', leader: 'James Marape', position: 'Prime Minister', wonders: [] },
+            { name: 'Paraguay', capital: 'Asunción', flag: '🇵🇾', region: 'Americas', leader: 'Santiago Peña Penfold', position: 'President', wonders: [] },
+            { name: 'Peru', capital: 'Lima', flag: '🇵🇪', region: 'Americas', leader: 'Dina Boluarte Zegarra', position: 'President', wonders: ['Machu Picchu', 'Nazca Lines'] },
+            { name: 'Philippines', capital: 'Manila', flag: '🇵🇭', region: 'Asia', leader: 'Ferdinand Marcos Jr.', position: 'President', wonders: ['Palawan'] },
+            { name: 'Poland', capital: 'Warsaw', flag: '🇵🇱', region: 'Europe', leader: 'Donald Tusk', position: 'Prime Minister', wonders: ['Auschwitz'] },
+            { name: 'Portugal', capital: 'Lisbon', flag: '🇵🇹', region: 'Europe', leader: 'António Costa', position: 'Prime Minister', wonders: [] },
+            { name: 'Qatar', capital: 'Doha', flag: '🇶🇦', region: 'Asia', leader: 'Tamim bin Hamad Al Thani', position: 'Emir', wonders: [] },
+            { name: 'Romania', capital: 'Bucharest', flag: '🇷🇴', region: 'Europe', leader: 'Marcel Ciolacu', position: 'Prime Minister', wonders: [] },
+            { name: 'Russia', capital: 'Moscow', flag: '🇷🇺', region: 'Europe', leader: 'Vladimir Putin', position: 'President', wonders: [] },
+            { name: 'Rwanda', capital: 'Kigali', flag: '🇷🇼', region: 'Africa', leader: 'Paul Kagame', position: 'President', wonders: [] },
+            { name: 'Saint Kitts and Nevis', capital: 'Basseterre', flag: '🇰🇳', region: 'Americas', leader: 'Terrence Michael Drew', position: 'Prime Minister', wonders: [] },
+            { name: 'Saint Lucia', capital: 'Castries', flag: '🇱🇨', region: 'Americas', leader: 'Philip J. Pierre', position: 'Prime Minister', wonders: [] },
+            { name: 'Saint Vincent and the Grenadines', capital: 'Kingstown', flag: '🇻🇨', region: 'Americas', leader: 'Ralph Gonsalves', position: 'Prime Minister', wonders: [] },
+            { name: 'Samoa', capital: 'Apia', flag: '🇼🇸', region: 'Oceania', leader: 'Fiamē Naomi Mata\'afa', position: 'Prime Minister', wonders: [] },
+            { name: 'San Marino', capital: 'San Marino', flag: '🇸🇲', region: 'Europe', leader: 'Gian Carlo Venturini', position: 'Co-Prince', wonders: [] },
+            { name: 'Sao Tome and Principe', capital: 'São Tomé', flag: '🇸🇹', region: 'Africa', leader: 'Manuel Pina da Costa', position: 'President', wonders: [] },
+            { name: 'Saudi Arabia', capital: 'Riyadh', flag: '🇸🇦', region: 'Asia', leader: 'Mohammed bin Salman', position: 'Crown Prince', wonders: [] },
+            { name: 'Senegal', capital: 'Dakar', flag: '🇸🇳', region: 'Africa', leader: 'Bassirou Diomaye Faye', position: 'President', wonders: [] },
+            { name: 'Serbia', capital: 'Belgrade', flag: '🇷🇸', region: 'Europe', leader: 'Ana Brnabić', position: 'Prime Minister', wonders: [] },
+            { name: 'Seychelles', capital: 'Victoria', flag: '🇸🇨', region: 'Africa', leader: 'Wavel Ramkalawan', position: 'President', wonders: [] },
+            { name: 'Sierra Leone', capital: 'Freetown', flag: '🇸🇱', region: 'Africa', leader: 'Julius Maada Bio', position: 'President', wonders: [] },
+            { name: 'Singapore', capital: 'Singapore', flag: '🇸🇬', region: 'Asia', leader: 'Lawrence Wong', position: 'Prime Minister', wonders: [] },
+            { name: 'Slovakia', capital: 'Bratislava', flag: '🇸🇰', region: 'Europe', leader: 'Robert Fico', position: 'Prime Minister', wonders: [] },
+            { name: 'Slovenia', capital: 'Ljubljana', flag: '🇸🇮', region: 'Europe', leader: 'Robert Golob', position: 'Prime Minister', wonders: [] },
+            { name: 'Solomon Islands', capital: 'Honiara', flag: '🇸🇧', region: 'Oceania', leader: 'Manasseh Sogavare', position: 'Prime Minister', wonders: [] },
+            { name: 'Somalia', capital: 'Mogadishu', flag: '🇸🇴', region: 'Africa', leader: 'Hassan Sheikh Mohamud', position: 'President', wonders: [] },
+            { name: 'South Africa', capital: 'Pretoria', flag: '🇿🇦', region: 'Africa', leader: 'Cyril Ramaphosa', position: 'President', wonders: [] },
+            { name: 'South Sudan', capital: 'Juba', flag: '🇸🇸', region: 'Africa', leader: 'Salva Kiir Mayardit', position: 'President', wonders: [] },
+            { name: 'Spain', capital: 'Madrid', flag: '🇪🇸', region: 'Europe', leader: 'Pedro Sánchez', position: 'Prime Minister', wonders: ['Sagrada Familia', 'Alhambra'] },
+            { name: 'Sri Lanka', capital: 'Colombo', flag: '🇱🇰', region: 'Asia', leader: 'Dinesh Gunawardena', position: 'Prime Minister', wonders: [] },
+            { name: 'Sudan', capital: 'Khartoum', flag: '🇸🇩', region: 'Africa', leader: 'Abdelfattah al-Burhan', position: 'Chairman', wonders: [] },
+            { name: 'Suriname', capital: 'Paramaribo', flag: '🇸🇷', region: 'Americas', leader: 'Chan Santokhi', position: 'President', wonders: [] },
+            { name: 'Sweden', capital: 'Stockholm', flag: '🇸🇪', region: 'Europe', leader: 'Ulf Kristersson', position: 'Prime Minister', wonders: [] },
+            { name: 'Switzerland', capital: 'Bern', flag: '🇨🇭', region: 'Europe', leader: 'Federal Council', position: 'Collegiate Leadership', wonders: ['Matterhorn'] },
+            { name: 'Syria', capital: 'Damascus', flag: '🇸🇾', region: 'Asia', leader: 'Bashar al-Assad', position: 'President', wonders: ['Palmyra'] },
+            { name: 'Taiwan', capital: 'Taipei', flag: '🇹🇼', region: 'Asia', leader: 'Lai Ching-te', position: 'President', wonders: [] },
+            { name: 'Tajikistan', capital: 'Dushanbe', flag: '🇹🇯', region: 'Asia', leader: 'Emomali Rahmon', position: 'President', wonders: [] },
+            { name: 'Tanzania', capital: 'Dar es Salaam', flag: '🇹🇿', region: 'Africa', leader: 'Samia Suluhu Hassan', position: 'President', wonders: ['Mount Kilimanjaro'] },
+            { name: 'Thailand', capital: 'Bangkok', flag: '🇹🇭', region: 'Asia', leader: 'Srettha Thavisin', position: 'Prime Minister', wonders: [] },
+            { name: 'Timor-Leste', capital: 'Dili', flag: '🇹🇱', region: 'Asia', leader: 'Xanana Gusmão', position: 'Prime Minister', wonders: [] },
+            { name: 'Togo', capital: 'Lomé', flag: '🇹🇬', region: 'Africa', leader: 'Victoire Tomegah Dogbe', position: 'Prime Minister', wonders: [] },
+            { name: 'Tonga', capital: 'Nuku\'alofa', flag: '🇹🇴', region: 'Oceania', leader: 'Hu\'akavameiliku', position: 'Prime Minister', wonders: [] },
+            { name: 'Trinidad and Tobago', capital: 'Port of Spain', flag: '🇹🇹', region: 'Americas', leader: 'Colm Kelleher', position: 'Prime Minister', wonders: [] },
+            { name: 'Tunisia', capital: 'Tunis', flag: '🇹🇳', region: 'Africa', leader: 'Kaïs Saïed', position: 'President', wonders: [] },
+            { name: 'Turkey', capital: 'Ankara', flag: '🇹🇷', region: 'Asia', leader: 'Recep Tayyip Erdoğan', position: 'President', wonders: ['Hagia Sophia', 'Troy'] },
+            { name: 'Turkmenistan', capital: 'Ashgabat', flag: '🇹🇲', region: 'Asia', leader: 'Serdar Berdimuhamedov', position: 'President', wonders: [] },
+            { name: 'Tuvalu', capital: 'Funafuti', flag: '🇹🇻', region: 'Oceania', leader: 'Kausea Natano', position: 'Prime Minister', wonders: [] },
+            { name: 'Uganda', capital: 'Kampala', flag: '🇺🇬', region: 'Africa', leader: 'Yoweri Museveni', position: 'President', wonders: [] },
+            { name: 'Ukraine', capital: 'Kyiv', flag: '🇺🇦', region: 'Europe', leader: 'Volodymyr Zelenskyy', position: 'President', wonders: ['St. Michael\'s Monastery'] },
+            { name: 'United Arab Emirates', capital: 'Abu Dhabi', flag: '🇦🇪', region: 'Asia', leader: 'Mohammed bin Zayed Al Nahyan', position: 'President', wonders: ['Burj Khalifa'] },
+            { name: 'United Kingdom', capital: 'London', flag: '🇬🇧', region: 'Europe', leader: 'Keir Starmer', position: 'Prime Minister', wonders: ['Big Ben', 'Tower of London', 'Stonehenge'] },
+            { name: 'United States', capital: 'Washington D.C.', flag: '🇺🇸', region: 'Americas', leader: 'Joe Biden', position: 'President', wonders: ['Statue of Liberty', 'Golden Gate Bridge', 'Grand Canyon'] },
+            { name: 'Uruguay', capital: 'Montevideo', flag: '🇺🇾', region: 'Americas', leader: 'Luis Lacalle Pou', position: 'President', wonders: [] },
+            { name: 'Uzbekistan', capital: 'Tashkent', flag: '🇺🇿', region: 'Asia', leader: 'Shavkat Mirziyoyev', position: 'President', wonders: ['Registan', 'Samarkand'] },
+            { name: 'Vanuatu', capital: 'Port Vila', flag: '🇻🇺', region: 'Oceania', leader: 'Charlot Salwai', position: 'Prime Minister', wonders: [] },
+            { name: 'Vatican City', capital: 'Vatican City', flag: '🇻🇦', region: 'Europe', leader: 'Pope Francis', position: 'Pope', wonders: ['St. Peter\'s Basilica', 'Sistine Chapel'] },
+            { name: 'Venezuela', capital: 'Caracas', flag: '🇻🇪', region: 'Americas', leader: 'Nicolás Maduro', position: 'President', wonders: ['Angel Falls'] },
+            { name: 'Vietnam', capital: 'Hanoi', flag: '🇻🇳', region: 'Asia', leader: 'Pham Minh Chinh', position: 'Prime Minister', wonders: ['Ha Long Bay'] },
+            { name: 'Yemen', capital: 'Sana\'a', flag: '🇾🇪', region: 'Asia', leader: 'Abd Rabbuh Mansur Hadi', position: 'President', wonders: [] },
+            { name: 'Zambia', capital: 'Lusaka', flag: '🇿🇲', region: 'Africa', leader: 'Hakainde Hichilema', position: 'President', wonders: ['Victoria Falls'] },
+            { name: 'Zimbabwe', capital: 'Harare', flag: '🇿🇼', region: 'Africa', leader: 'Emmerson Mnangagwa', position: 'President', wonders: ['Victoria Falls'] }
+        ];
+
+        function init() {
+            allCountries = countriesData.sort((a, b) => a.name.localeCompare(b.name));
+            renderCountries(allCountries);
+            updateStats(allCountries.length);
+        }
+
+        function renderCountries(countries) {
+            const grid = document.getElementById('countriesGrid');
+            
+            if (countries.length === 0) {
+                grid.innerHTML = '<div class="no-results">🔍 No countries found. Try a different search!</div>';
+                return;
+            }
+
+            grid.innerHTML = countries.map(country => `
+                <div class="country-card" onclick="openModal('${country.name.replace(/'/g, "\\'")}')">
+                    <div class="flag-section">${country.flag}</div>
+                    <div class="country-info">
+                        <div class="country-name">${country.name}</div>
+                        <div class="info-row">
+                            <div class="label">🏛️ Capital</div>
+                            <div class="value">${country.capital}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="label">👑 Leader</div>
+                            <div class="value">${country.leader.split(' ').slice(0, 2).join(' ')}</div>
+                        </div>
+                        <div class="region-badge">${country.region}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStats(count) {
+            document.getElementById('countryCount').textContent = `✨ ${count} countries discovered • Click any to explore! 🌍`;
+        }
+
+        function searchCountries() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = allCountries;
+
+            if (query) {
+                filtered = filtered.filter(country => 
+                    country.name.toLowerCase().includes(query) ||
+                    country.capital.toLowerCase().includes(query) ||
+                    country.leader.toLowerCase().includes(query)
+                );
+            }
+
+            if (currentRegion !== 'all') {
+                filtered = filtered.filter(country => country.region === currentRegion);
+            }
+
+            renderCountries(filtered);
+            updateStats(filtered.length);
+        }
+
+        function filterByRegion(region, event) {
+            currentRegion = region;
+            
+            document.querySelectorAll('.region-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            searchCountries();
+        }
+
+        function openModal(countryName) {
+            const country = allCountries.find(c => c.name === countryName);
+            if (!country) return;
+
+            document.getElementById('modalFlag').textContent = country.flag;
+            document.getElementById('modalCountryName').textContent = country.name;
+            document.getElementById('modalCapital').textContent = `🏛️ ${country.capital}`;
+            
+            document.getElementById('leaderInfo').textContent = country.leader;
+            document.getElementById('positionInfo').textContent = country.position;
+            document.getElementById('regionInfo').textContent = country.region;
+
+            const wondersContainer = document.getElementById('wondersContainer');
+            if (country.wonders && country.wonders.length > 0) {
+                wondersContainer.innerHTML = country.wonders.map(wonder => `
+                    <div class="wonder-item">
+                        <div class="wonder-name">🏛️ ${wonder}</div>
+                        <div class="wonder-description">UNESCO World Heritage Site & Natural Wonder</div>
+                    </div>
+                `).join('');
+            } else {
+                wondersContainer.innerHTML = '<div class="no-wonder">No major world wonders recorded</div>';
+            }
+
+            document.getElementById('countryModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('countryModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('countryModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        document.getElementById('searchInput').addEventListener('input', searchCountries);
+        init();
+    </script>
+</body>
+</html>
